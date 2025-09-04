@@ -11,7 +11,7 @@ First, locate where your Office Scripts are stored. Check these locations:
 ```bash
 # Most common locations on Mac
 ls "$HOME/OneDrive - Personal/Office Scripts"
-ls "$HOME/OneDrive/Office Scripts"  
+ls "$HOME/OneDrive/Office Scripts"
 ls "$HOME/Library/CloudStorage/OneDrive-Personal/Office Scripts"
 ```
 
@@ -36,7 +36,11 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // UPDATE THIS PATH to match your OneDrive location from step 1
-const ONEDRIVE_SCRIPTS_PATH = path.join(process.env.HOME, 'OneDrive - Personal', 'Office Scripts');
+const ONEDRIVE_SCRIPTS_PATH = path.join(
+  process.env.HOME,
+  'OneDrive - Personal',
+  'Office Scripts'
+);
 
 function deployScript(sourceFilePath, shouldSwitchToExcel = false) {
   if (!fs.existsSync(sourceFilePath)) {
@@ -45,7 +49,10 @@ function deployScript(sourceFilePath, shouldSwitchToExcel = false) {
   }
 
   if (!fs.existsSync(ONEDRIVE_SCRIPTS_PATH)) {
-    console.error('❌ OneDrive Office Scripts folder not found at:', ONEDRIVE_SCRIPTS_PATH);
+    console.error(
+      '❌ OneDrive Office Scripts folder not found at:',
+      ONEDRIVE_SCRIPTS_PATH
+    );
     console.error('Please update ONEDRIVE_SCRIPTS_PATH in deploy.js');
     return;
   }
@@ -57,7 +64,7 @@ function deployScript(sourceFilePath, shouldSwitchToExcel = false) {
   const ostsPath = path.join(ONEDRIVE_SCRIPTS_PATH, ostsFileName);
 
   let ostsContent;
-  
+
   if (fs.existsSync(ostsPath)) {
     // Update existing .osts file
     try {
@@ -71,24 +78,27 @@ function deployScript(sourceFilePath, shouldSwitchToExcel = false) {
   } else {
     // Create new .osts file
     ostsContent = {
-      "version": "0.3.0",
-      "body": sourceContent,
-      "metadata": {
-        "name": fileName,
-        "description": "",
-        "created": new Date().toISOString(),
-        "lastModified": new Date().toISOString()
-      }
+      version: '0.3.0',
+      body: sourceContent,
+      metadata: {
+        name: fileName,
+        description: '',
+        created: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+      },
     };
   }
 
   try {
     fs.writeFileSync(ostsPath, JSON.stringify(ostsContent, null, 2));
     console.log(`✅ Deployed ${fileName} to Office Scripts`);
-    
+
     if (shouldSwitchToExcel) {
       try {
-        execSync('osascript -e \'tell application "Microsoft Excel" to activate\'', { stdio: 'ignore' });
+        execSync(
+          'osascript -e \'tell application "Microsoft Excel" to activate\'',
+          { stdio: 'ignore' }
+        );
         console.log('🔄 Switched to Excel');
       } catch (error) {
         console.log('⚠️  Could not switch to Excel (not running?)');
@@ -156,21 +166,23 @@ Create `src/my-script.ts`:
 ```typescript
 function main(workbook: ExcelScript.Workbook): void {
   const worksheet = workbook.getActiveWorksheet();
-  const range = worksheet.getRange("A1");
-  range.setValue("Hello from VS Code!");
-  
-  console.log("Script executed successfully!");
+  const range = worksheet.getRange('A1');
+  range.setValue('Hello from VS Code!');
+
+  console.log('Script executed successfully!');
 }
 ```
 
 ## Usage
 
 ### Method 1: Keyboard Shortcut (Recommended)
+
 1. Open your TypeScript file in VS Code
-2. Press **Cmd+Shift+D** 
+2. Press **Cmd+Shift+D**
 3. Your script is deployed and Excel opens automatically!
 
 ### Method 2: Command Line
+
 ```bash
 # Deploy and switch to Excel
 node deploy.js src/my-script.ts --switch
@@ -180,6 +192,7 @@ node deploy.js src/my-script.ts
 ```
 
 ### Method 3: VS Code Command Palette
+
 1. Press **Cmd+Shift+P**
 2. Type "Tasks: Run Task"
 3. Select "Deploy Office Script"
@@ -223,20 +236,24 @@ The deploy script simply updates the `body` field with your TypeScript source co
 ## Troubleshooting
 
 **Script not appearing in Excel?**
+
 - Check that OneDrive is syncing (look for the cloud icon in menu bar)
 - Verify the ONEDRIVE_SCRIPTS_PATH in deploy.js is correct
 - Wait 10-15 seconds and refresh the Office Scripts panel in Excel
 
 **"OneDrive folder not found" error?**
+
 - Update the ONEDRIVE_SCRIPTS_PATH in deploy.js with the correct path from step 1
 
 **Excel not switching focus?**
+
 - Make sure Excel is running before using --switch
 - The script will still deploy successfully even if Excel switching fails
 
 ## Next Steps
 
 Once you're comfortable with this setup, you might want to:
+
 - Set up a file watcher for automatic deployment on save
 - Add TypeScript compilation and error checking
 - Create templates for common Office Scripts patterns
